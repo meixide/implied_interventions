@@ -47,7 +47,6 @@ The framework leads to:
 - G-computation formulas under hidden confounding
 - Functional projections on identifiable effect spaces
 
-## Key Innovation
 
 > "Rather than postulating what would identify our causal estimand, we let the data tell us which interventions are already implied."
 
