@@ -72,7 +72,3 @@ If you use this code or theoretical framework, please cite:
 - **Mark J. van der Laan** — [vanderlaan-lab.org](https://vanderlaan-lab.org)
 
 
-
----
-
-*This work presents a novel framework for causal inference that prioritizes identification transparency over assumption-making, providing researchers with a principled approach to instrumental variable analysis.*
