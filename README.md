@@ -1,8 +1,7 @@
 # Causal Inference via Implied Interventions
 
 **Authors:**  
-[Carlos García Meixide](https://meixide.gal) 
-[Mark J. van der Laan](https://vanderlaan-lab.org) 
+[Carlos García Meixide](https://meixide.gal) and [Mark J. van der Laan](https://vanderlaan-lab.org) 
 
 ---
 
