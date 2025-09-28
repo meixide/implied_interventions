@@ -34,6 +34,9 @@ Our approach interprets **instrumental-variable–based causal inference** as a 
 
 ## Conceptual Framework
 
+![Implied interventions](gmap.png)
+
+
 This methodology reverses the traditional order of causal inference with instrumental variables:
 
 1. **Traditional approach**: Start with a desired causal effect → Make assumptions for identification
