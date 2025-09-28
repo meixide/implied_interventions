@@ -6,8 +6,6 @@ n=500
 
 pw=0.3
 
-setwd("/Users/cgmeixide/Dropbox/ivhal")
-
 hid_conf=T
 
 out = function(A,W,U) return(2 * A + W - U)

@@ -1,0 +1,121 @@
+# ------------------------------------------------------------
+# Demo: EM where the M-step is a weighted logistic lasso (glmnet)
+# ------------------------------------------------------------
+# Model:
+#   Z|W ~ Bernoulli( h(1|W) = expit(beta^T W) )
+#   A|Z,W ~ Normal( mu = z + 0.5 * W1, sd = 1 )
+# Desired g*: use a "target" h_tgt differing from initialization
+# Goal: Maximize sum_i log ∫ p(A_i*|z,W_i) h(z|W_i) dz via EM
+# M-step: lasso logistic using glmnet with soft labels τ_i
+# ------------------------------------------------------------
+
+set.seed(123)
+
+
+# ---------- helpers ----------
+expit <- function(x) 1/(1+exp(-x))
+
+# Observed log-likelihood:
+obs_loglik <- function(A, W, beta, like_fun) {
+  # h(1|W) under beta
+  eta <- drop(W %*% beta)
+  h1  <- expit(eta)
+  h0  <- 1 - h1
+  # p(A | z, W)
+  p1  <- like_fun(A, z = 1, W = W)  # vector length n
+  p0  <- like_fun(A, z = 0, W = W)
+  # g(h)(A|W) = p1*h1 + p0*h0
+  gh  <- p1 * h1 + p0 * h0
+  sum(log(pmax(gh, 1e-300)))
+}
+
+# E-step (binary Z): posterior τ_i = P(Z=1 | A, W; beta)
+posterior_tau <- function(A, W, beta, like_fun) {
+  eta <- drop(W %*% beta)
+  h1  <- expit(eta)
+  h0  <- 1 - h1
+  p1  <- like_fun(A, z = 1, W = W)
+  p0  <- like_fun(A, z = 0, W = W)
+  num <- p1 * h1
+  den <- p1 * h1 + p0 * h0
+  tau <- num / pmax(den, 1e-300)
+  # clip for numerical stability
+  pmin(pmax(tau, 1e-6), 1 - 1e-6)
+}
+
+# Build expanded data for glmnet:
+# For each i, create 2 rows: (y=1, weight=τ_i) and (y=0, weight=1-τ_i).
+expand_for_glmnet <- function(W, tau) {
+  n <- nrow(W)
+  X2 <- rbind(W, W)
+  y2 <- c(rep(1L, n), rep(0L, n))
+  w2 <- c(tau, 1 - tau)
+  list(X = X2, y = y2, w = w2)
+}
+
+# ---------- simulate W and define likelihood p(A|Z,W) ----------
+n  <- 800
+p  <- 5        # number of features (incl. intercept column we will add manually)
+W0 <- matrix(rnorm(n * (p - 1)), n, p - 1)
+W  <- cbind(1, W0)           # add intercept column; we'll manage intercept ourselves
+
+# Likelihood p(A|Z,W): Normal with mean mu = Z + 0.5*W1, sd = 1
+like_fun <- function(A, z, W) {
+  mu <- z + 0.5 * W[, 2]    # W[,2] is first non-intercept feature
+  dnorm(A, mean = mu, sd = 1)
+}
+
+# ---------- choose a target g* by specifying a "true" beta_tgt ----------
+beta_tgt <- c(-0.2, 1.0, -0.5, 0.0, 0.8)  # length p
+# Draw Z* ~ Bernoulli(h_tgt(1|W)), then A* ~ N(z + 0.5*W1, 1)
+h1_tgt <- expit(drop(W %*% beta_tgt))
+Zstar  <- rbinom(n, 1, h1_tgt)
+Astar  <- rnorm(n, mean = Zstar + 0.5 * W[, 2], sd = 1)
+
+# ---------- EM with glmnet in the M-step ----------
+# init beta
+beta <- rep(0, p)       # start at 0
+lambda_fixed <- 1e-3    # keep lambda fixed to preserve ascent property
+maxit <- 50
+tol   <- 1e-6
+
+ll_hist <- numeric(maxit + 1)
+ll_hist[1] <- obs_loglik(Astar, W, beta, like_fun)
+
+cat(sprintf("Iter %2d | loglik = %.6f\n", 0, ll_hist[1]))
+
+for (k in 1:maxit) {
+  # E-step
+  tau <- posterior_tau(Astar, W, beta, like_fun)
+  
+  # M-step via glmnet (lasso binomial with expanded data)
+  ex <- expand_for_glmnet(W, tau)
+  # glmnet adds an intercept by default; we ALREADY have an intercept column in W.
+  # To avoid double intercept, set intercept = FALSE.
+  fit <- glmnet(
+    x = ex$X,
+    y = ex$y,
+    family = "binomial",
+    weights = ex$w,
+    alpha = 1,               # lasso
+    lambda = lambda_fixed,   # fixed lambda grid of length 1
+    standardize = FALSE,
+    intercept = FALSE
+  )
+  beta <- as.numeric(coef(fit, s = lambda_fixed))[-1]  # drop the (unused) intercept term
+  # NOTE: because intercept=FALSE, coef() still returns a first element for intercept (0);
+  # we drop it to keep beta aligned with W columns.
+  
+  # Monitor observed log-likelihood
+  ll_hist[k + 1] <- obs_loglik(Astar, W, beta, like_fun)
+  cat(sprintf("Iter %2d | loglik = %.6f  (Δ=%.6e)\n",
+              k, ll_hist[k + 1], ll_hist[k + 1] - ll_hist[k]))
+  
+  if (abs(ll_hist[k + 1] - ll_hist[k]) < tol) break
+}
+
+cat("\nFinal beta (lasso):\n")
+print(round(beta, 3))
+
+cat("\nTrue target beta:\n")
+print(round(beta_tgt, 3))
