@@ -1,16 +1,11 @@
 # Causal Inference via Implied Interventions
 
-**Authors:**  
-[Carlos García Meixide](https://meixide.gal) and [Mark J. van der Laan](https://vanderlaan-lab.org) 
-
----
-
-## Overview
-
 This repository contains the R code accompanying the paper:
 
 > **Causal Inference via Implied Interventions**  
 > *by Carlos García Meixide and Mark J. van der Laan*
+
+![Observational and interventional environments created by stochastically manipulating the instrument](commut.png)
 
 ## Abstract
 
@@ -36,63 +31,6 @@ Our approach interprets **instrumental-variable–based causal inference** as a 
 | `sims_eic.R` | Implements **simulation experiments** from Section 7.1 (influence function–based estimators) |
 | `sims_em.R` | Implements **EM–based simulations** from Section 7.2 (Expectation–Maximization with HAL) |
 
-## Getting Started
-
-### Prerequisites
-
-Make sure you have R installed with the following packages:
-
-```r
-install.packages(c("tidyverse", "data.table", "glmnet", "plotly", "hal9001"))
-```
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/meixide/implied-interventions.git
-   cd implied-interventions
-   ```
-
-2. Open R in the project directory
-
-### Usage
-
-#### Reproduce Main Examples
-
-```r
-source("load_example.R")
-source("intro_example.R")
-```
-
-#### Replicate Medicaid Lottery Analysis
-
-```r
-source("data.R")
-source("oregon.R")
-```
-
-#### Generate Plots
-
-```r
-source("plot1.R")  # Framework illustration
-```
-
-#### Run Simulations
-
-```r
-source("sims_eic.R")  # Influence function-based estimators
-source("sims_em.R")   # EM-based simulations with HAL
-```
-
-## Expected Outputs
-
-Running the scripts will produce:
-
-- **Introductory example figures**: Illustrations comparing implied vs. desired interventions
-- **Framework visualization**: Graphical representation of the implied interventions methodology
-- **Simulation results**: Empirical evaluation of proposed estimators
-- **Oregon analysis**: Comparison between identifiable and desired causal effects using real-world data
 
 ## Conceptual Framework
 
@@ -105,7 +43,6 @@ The framework leads to:
 - Explicit characterization of identifiable treatment effects
 - G-computation formulas under hidden confounding
 - Functional projections on identifiable effect spaces
-- Bridge between semiparametric theory, EM algorithms, and machine learning
 
 ## Key Innovation
 
@@ -118,12 +55,14 @@ This approach provides a transparent and assumption-light alternative to traditi
 If you use this code or theoretical framework, please cite:
 
 ```bibtex
-@article{meixide2025impliedinterventions,
-  title   = {Causal Inference via Implied Interventions},
-  author  = {Carlos Garc{\'i}a Meixide and Mark J. van der Laan},
-  year    = {2025},
-  journal = {Preprint},
-  url     = {https://github.com/meixide/implied-interventions}
+@misc{meixide2025,
+      title={Causal inference via implied interventions}, 
+      author={Carlos García Meixide and Mark J. van der Laan},
+      year={2025},
+      eprint={2506.21501},
+      archivePrefix={arXiv},
+      primaryClass={math.ST},
+      url={https://arxiv.org/abs/2506.21501}, 
 }
 ```
 
@@ -132,9 +71,7 @@ If you use this code or theoretical framework, please cite:
 - **Carlos García Meixide** — [meixide.gal](https://meixide.gal)
 - **Mark J. van der Laan** — [vanderlaan-lab.org](https://vanderlaan-lab.org)
 
-## License
 
-[Add appropriate license information]
 
 ---
 
